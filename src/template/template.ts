@@ -1,0 +1,48 @@
+import FullList from "../model/FullList";
+
+interface DOMList {
+  ul: HTMLUListElement;
+  clear(): void;
+  render(fullList: FullList): void;
+}
+
+export default class Template implements DOMList {
+  ul: HTMLUListElement;
+  static instance: Template = new Template();
+  private constructor() {
+    this.ul = document.getElementById("listItems") as HTMLUListElement;
+  }
+
+  public clear(): void {
+    this.ul.innerHTML = "";
+  }
+  render(fullList: FullList): void {
+    this.clear();
+    fullList.list.forEach((item, index: number) => {
+      const li = document.createElement("li") as HTMLLIElement;
+      li.className = "item";
+      const check = document.createElement("input") as HTMLInputElement;
+      check.id = item.id;
+      check.type = "checkbox";
+      check.tabIndex = index;
+      check.checked = item.checked;
+      li.append(check);
+      check.addEventListener("change", () => {
+        item.checked = !item.checked;
+        fullList.save();
+      });
+      const label = document.createElement("label") as HTMLLabelElement;
+      label.htmlFor = item.id;
+      label.textContent = item.item;
+      li.append(label);
+      const button = document.createElement("button") as HTMLButtonElement;
+      button.textContent = "x";
+      button.addEventListener("click", () => {
+        fullList.removeItem(item.id);
+        this.render(fullList);
+      });
+      li.append(button);
+      this.ul.append(li);
+    });
+  }
+}
